@@ -45,6 +45,10 @@
   <input type="text" id="searchInput" placeholder="Search by task name...">
   <button onclick="searchTasks()">Search</button>
   <button onclick="clearSearch()">Clear Search</button>
+
+  <h2>View Backlogs</h2>
+  <button onclick="viewPendingTasks()">View Pending Tasks</button>
+  <button onclick="viewMissedTasks()">View Missed Tasks</button>
   
   <ul id="taskList" ondrop="dropTask(event)" ondragover="allowDropTask(event)"></ul>
    

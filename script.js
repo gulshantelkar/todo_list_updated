@@ -265,7 +265,18 @@ function sortTasks() {
   } else if (sortBy === "dueDate") {
     tasks.sort((a, b) => (a.dueDate > b.dueDate ? 1 : -1));
   }
-  
+  else if (sortBy === "pending") {
+    viewPendingTasks();
+  } else if (sortBy === "missed") {
+    viewMissedTasks();
+  } else {
+    displayTasks();
+  }
+
+  displayTasks();
+}
+function clearSortFilter() {
+  sortOption.value = "default";
   displayTasks();
 }
 
@@ -284,6 +295,7 @@ function clearSearch() {
 
 
 sortOption.addEventListener("change", sortTasks);
+
 searchInput.addEventListener("input", searchTasks);
 
 displayTasks();
@@ -311,3 +323,22 @@ function dropTask(event) {
   }
 }
 
+function displayPendingTasks() {
+  const pendingTasks = tasks.filter((task) => !task.done);
+  displayFilteredTasks(pendingTasks);
+}
+
+function displayMissedTasks() {
+  const today = new Date().toISOString().split("T")[0];
+  const missedTasks = tasks.filter((task) => task.dueDate < today && !task.done);
+  displayFilteredTasks(missedTasks);
+}
+function viewPendingTasks() {
+  sortOption.value = "default";
+  displayPendingTasks();
+}
+
+function viewMissedTasks() {
+  sortOption.value = "default";
+  displayMissedTasks();
+}
