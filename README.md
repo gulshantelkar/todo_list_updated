@@ -1,6 +1,5 @@
 # todo_list_updated
 features added:
-
 Add Todo
 Edit Todo
 Delete Todo
