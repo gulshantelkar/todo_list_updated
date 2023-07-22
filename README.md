@@ -15,3 +15,6 @@ Sorting,
 Search,
 Reminders,
 Arrange
+
+
+for get back to normal list of todos after pressing view pending tasks or missed tasks , you have to rfresh the page or just clear search
