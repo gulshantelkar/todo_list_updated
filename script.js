@@ -19,20 +19,123 @@ function displayTasks() {
     const listItem = document.createElement("li");
     listItem.setAttribute("draggable", "true");
     listItem.setAttribute("ondragstart", `dragTask(event, ${index})`);
+    listItem.classList.add(`task-item-${index}`);
+    listItem.classList.add(`taskItem`);
+    let subtaskItem = ""
+    console.log(`task ${index}`,task.subtask);
+    if(task.subtask){
+      subtaskItem+=`<ul class="subTaskList">`
+      task.subtask.forEach((subtask,subIndex)=>{
+        console.log(`task ${index} subtask ${subIndex} = ${subtask}`);
+        subtaskItem += `<li class="subTaskItem" subtask="${subIndex}">
+        <p>${subIndex+1}. ${subtask}</p>
+        <input type="text" class="hidden editSubtask" name="editSubtask">
+        <button btn="editSubtask" onclick="editSubtask(${index}, ${subIndex})">Edit</button>
+        <button btn="saveSubtask" class="hidden" onclick="saveSubtask(${index}, ${subIndex})">Save</button>
+        <button btn="deleteSubtask" onclick="deleteSubTask(${index},${ subIndex})">Delete</button>
+        </li>` 
+      })
+      subtaskItem+=`</ul>`
+    }
     listItem.innerHTML = `
-      <input type="checkbox" onchange="toggleTaskStatus(${index})" ${task.done ? "checked" : ""}>
-      <strong>Task:</strong> ${task.taskName}<br>
-      <strong>Category:</strong> ${task.category}<br>
-      <strong>Priority:</strong> ${task.priority}<br>
-      <strong>Due Date:</strong> ${task.dueDate}<br>
-      <strong>Reminder:</strong> ${task.reminder ? task.reminder : "Not set"}<br>
+      <div><input type="checkbox" onchange="toggleTaskStatus(${index})" ${task.done ? "checked" : ""}></div>
+      <div>
+      <p><strong>Task:</strong> ${task.taskName}</p>
+      ${
+       subtaskItem
+      }
+      <p><strong>Category:</strong> ${task.category}</p>
+      <p><strong>Priority:</strong> ${task.priority}</p>
+      <p><strong>Due Date:</strong> ${task.dueDate}</p>
+      <p><strong>Reminder:</strong> ${task.reminder ? task.reminder : "Not set"}</p>
       <button onclick="editTask(${index})">Edit</button>
       <button onclick="deleteTask(${index})">Delete</button>
+      <button onclick="toggleSubAddTaskSection(${index})">Add Subtask</button>
+      <div class="addSubtaskSection">
+        <input type="text" class="addsubtaskbtn" name="addSubtask">
+        <button onclick="addSubtask(${index})">Add</button>
+        <button onclick="toggleSubAddTaskSection(${index})">Cancel</button>
+      </div>
+      </div>
     `;
+
     taskList.appendChild(listItem);
   });
 
   updateFilterDropdowns();
+}
+function toggleSubAddTaskSection(index){
+  const subTaskSection=document.querySelector(`.task-item-${index} div.addSubtaskSection`);
+  if(subTaskSection.style.display=="block"){
+    subTaskSection.style.display="none";
+  }else{
+    subTaskSection.style.display="block";
+  }
+}
+
+function editSubtask(index, subIndex){
+  console.log('edit subtask ', index, subIndex);
+  const subTaskItem = document.querySelector(`.task-item-${index} .subTaskList li[subtask="${subIndex}"]`);
+  const editButton = subTaskItem.querySelector(`button[btn="editSubtask"]`);
+  const saveButton = subTaskItem.querySelector(`button[btn="saveSubtask"]`);
+  const deleteButton = subTaskItem.querySelector(`button[btn="deleteSubtask"]`);
+  const pTag = subTaskItem.querySelector(`p`);
+  const subtaskInput = subTaskItem.querySelector(`input[name="editSubtask"]`);
+
+  editButton.style.display = "none";
+  deleteButton.style.display = "none";
+  pTag.style.display = "none";
+
+  saveButton.style.display = "block";
+  subtaskInput.style.display = "block";
+  const subTaskValue = pTag.innerText ?? "";
+  subtaskInput.value = subTaskValue;
+}
+
+function saveSubtask(index, subIndex){
+  const subTaskItem = document.querySelector(`.task-item-${index} .subTaskList li[subtask="${subIndex}"]`);
+  const editButton = subTaskItem.querySelector(`button[btn="editSubtask"]`);
+  const saveButton = subTaskItem.querySelector(`button[btn="saveSubtask"]`);
+  const deleteButton = subTaskItem.querySelector(`button[btn="deleteSubtask"]`);
+  const pTag = subTaskItem.querySelector(`p`);
+  const subtaskInput = subTaskItem.querySelector(`input`);
+
+  editButton.style.display = "block";
+  deleteButton.style.display = "block";
+  pTag.style.display = "block";
+
+  saveButton.style.display = "none";
+  subtaskInput.style.dislay = "none";
+
+  const updatedValue = subtaskInput.value;
+  
+  tasks[index].subtask[subIndex] = updatedValue;
+  localStorage.setItem("tasks", JSON.stringify(tasks));
+
+  subtaskInput.value = "";
+  displayTasks();
+}
+
+function addSubtask(index){
+  const subTaskInputField=document.querySelector(`.task-item-${index} div.addSubtaskSection input[name="addSubtask"]`);
+  const subtaskValue = subTaskInputField.value;
+  if(tasks[index].subtask){
+    tasks[index].subtask.push(subtaskValue);
+  }else{
+    tasks[index].subtask = [subtaskValue];
+  }
+
+  localStorage.setItem("tasks", JSON.stringify(tasks));
+  
+  subtaskValue.value = "";
+
+  displayTasks();
+}
+
+function deleteSubTask(index, subIndex){
+  tasks[index].subtask.splice(subIndex,1);
+  localStorage.setItem("tasks", JSON.stringify(tasks));
+  displayTasks();
 }
 
 function addTask() {
@@ -50,7 +153,8 @@ function addTask() {
     priority: priority,
     dueDate: dueDate,
     reminder: reminder || null,
-    done: false // New task is marked as not done
+    done: false, 
+    subtask: []
   };
 
   tasks.push(task);
@@ -88,7 +192,7 @@ function toggleTaskStatus(index) {
 }
 
 function updateFilterDropdowns() {
-  // Get unique categories and populate the filterCategory dropdown
+  
   const uniqueCategories = [...new Set(tasks.map((task) => task.category))];
   filterCategory.innerHTML = `
     <option value="all">All Categories</option>
@@ -97,7 +201,6 @@ function updateFilterDropdowns() {
       .join("")}
   `;
 
-  // Get unique priorities and populate the filterPriority dropdown
   const uniquePriorities = [...new Set(tasks.map((task) => task.priority))];
   filterPriority.innerHTML = `
     <option value="all">All Priorities</option>
@@ -179,13 +282,12 @@ function clearSearch() {
   displayTasks();
 }
 
-// Event listeners for the Sort and Search buttons
+
 sortOption.addEventListener("change", sortTasks);
 searchInput.addEventListener("input", searchTasks);
 
 displayTasks();
 
-// Drag and Drop functions
 let dragTaskIndex = null;
 
 function allowDropTask(event) {
@@ -198,7 +300,7 @@ function dragTask(event, index) {
 
 function dropTask(event) {
   event.preventDefault();
-  const dropIndex = tasks.length; // Default to move the task to the end of the list
+  const dropIndex = tasks.length; 
 
   if (dragTaskIndex !== null) {
     const [draggedTask] = tasks.splice(dragTaskIndex, 1);
@@ -209,24 +311,3 @@ function dropTask(event) {
   }
 }
 
-function addSubtask() {
-  const subtaskName = subtaskInput.value.trim();
-  if (subtaskName === "") return;
-
-  const activeTask = tasks.find((task) => task.active);
-
-  if (activeTask) {
-    if (!activeTask.subtasks) {
-      activeTask.subtasks = [];
-    }
-    activeTask.subtasks.push({
-      subtaskName,
-      done: false
-    });
-    localStorage.setItem("tasks", JSON.stringify(tasks));
-
-    subtaskInput.value = "";
-
-    displayTasks();
-  }
-}

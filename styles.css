@@ -39,26 +39,23 @@ select {
   margin: 5px;
 }
 
-ul {
+ul#taskList {
   list-style: none;
   padding: 0;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
+  margin: auto;
 }
 
-li {
+li.taskItem {
   background-color: #ffac33;
   border-radius: 10px;
   padding: 10px;
-  margin: 10px;
+  margin: 10px auto;
   box-shadow: 2px 2px 2px rgba(0, 0, 0, 0.3);
+  /* display: flex;
+  flex-direction: column; */
+  /* text-align: center; */
+  width: 500px;
   display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  text-align: center;
-  width: 250px;
 }
 
 strong {
@@ -71,4 +68,25 @@ input[type="checkbox"] {
 
 input[type="checkbox"] + strong {
   color: #ffac33;
+}
+.addSubtaskSection{
+  display: none;
+}
+
+.subTaskList{
+  /* border: 1px solid black; */
+}
+
+.subTaskItem{
+  display: flex;
+  justify-content: space-between;
+}
+
+.hidden{
+  display: none;
+}
+
+input.editSubtask{
+  width: 300px;
+  background-color: white !important;
 }
